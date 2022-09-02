@@ -1,0 +1,6 @@
+SynapseSqlPoolExecRequests
+| where TimeGenerated > ago(2d)
+| where Command   has 'BuildReplicatedTableCache'
+| where StatementType == "BuildReplicatedTableCache"
+| summarize count() by Command
+| project Command, count_

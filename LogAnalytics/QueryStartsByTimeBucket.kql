@@ -1,0 +1,11 @@
+// Query Concurrency by time bucket (any request having at least been started)
+SynapseSqlPoolExecRequests
+| where Label != "health_checker"
+| where TimeGenerated > ago(3d)
+| where ResourceClass != ""
+| where StartTime > datetime(1601-01-01 00:00:00.0000000) //and EndTime > datetime(1601-01-01 00:00:00.0000000)
+| summarize DistinctRequests = dcount(RequestId) by ResourceClass, TimeBucket=bin(StartTime,1m)
+| project TimeBucket, P=pack(ResourceClass,DistinctRequests)
+| summarize make_bag(P) by TimeBucket
+| evaluate bag_unpack(bag_P)
+| order by TimeBucket desc;
